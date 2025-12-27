@@ -53,14 +53,14 @@ document.addEventListener('alpine:init', () => {
 
         async fetchData() {
             try {
-                const res = await fetch('http://127.0.0.1:8000/news');
+                const res = await fetch('https://technology-watch-spa.onrender.com/news');
                 this.news = await res.json();
             } catch (e) { console.error(e); }
         },
 
         async fetchStats() {
             try {
-                const res = await fetch('http://127.0.0.1:8000/stats');
+                const res = await fetch('https://technology-watch-spa.onrender.com/stats');
                 this.stats = await res.json();
             } catch (e) { console.error(e); }
         },
@@ -72,7 +72,7 @@ document.addEventListener('alpine:init', () => {
 
             try {
                 // 1. Last Scan Time
-                const res = await fetch('http://127.0.0.1:8000/scan-status');
+                const res = await fetch('https://technology-watch-spa.onrender.com/scan-status');
                 const state = await res.json();
                 
                 if(state.last_execution) {
@@ -97,7 +97,7 @@ document.addEventListener('alpine:init', () => {
         async triggerScan() {
             if (this.isScanning) return;
             try {
-                const res = await fetch('http://127.0.0.1:8000/trigger-scan', { method: 'POST' });
+                const res = await fetch('https://technology-watch-spa.onrender.com/trigger-scan', { method: 'POST' });
                 const data = await res.json();
                 if(data.status === 'started') {
                     this.isScanning = true;
@@ -109,7 +109,7 @@ document.addEventListener('alpine:init', () => {
         async checkScanStatus() {
             const timeOptions = { timeZone: 'Africa/Algiers', hour: '2-digit', minute: '2-digit' };
             try {
-                const res = await fetch('http://127.0.0.1:8000/scan-status');
+                const res = await fetch('https://technology-watch-spa.onrender.com/scan-status');
                 const state = await res.json();
                 if(state.is_scanning) {
                     this.isScanning = true;
@@ -130,7 +130,7 @@ document.addEventListener('alpine:init', () => {
                     return;
                 }
                 try {
-                    const res = await fetch('http://127.0.0.1:8000/scan-status');
+                    const res = await fetch('https://technology-watch-spa.onrender.com/scan-status');
                     const state = await res.json();
                     
                     this.scanProgress = state.progress;
@@ -158,7 +158,7 @@ document.addEventListener('alpine:init', () => {
         async toggleSave(item) {
             if(!item) return;
             item.is_saved = !item.is_saved;
-            try { await fetch(`http://127.0.0.1:8000/news/${item.id}/toggle-save`, { method: 'POST' }); } 
+            try { await fetch(`hhttps://technology-watch-spa.onrender.com/news/${item.id}/toggle-save`, { method: 'POST' }); } 
             catch(e) { item.is_saved = !item.is_saved; }
         },
 
@@ -198,7 +198,7 @@ document.addEventListener('alpine:init', () => {
             this.chatLoading = true;
             setTimeout(() => { document.getElementById('chatContainer').scrollTop = 9999; }, 100);
             try {
-                const res = await fetch('http://127.0.0.1:8000/chat', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ question: userMsg }) });
+                const res = await fetch('https://technology-watch-spa.onrender.com/chat', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ question: userMsg }) });
                 const data = await res.json();
                 this.chatMessages.push({ role: 'bot', content: marked.parse(data.response) });
             } catch (e) { this.chatMessages.push({ role: 'bot', content: "Erreur IA." }); } 

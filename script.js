@@ -19,7 +19,12 @@ document.addEventListener('alpine:init', () => {
         stats: {},
         filters: { search: '', provider: 'all', impact: 'all', category: 'all' },
         chatInput: '', chatLoading: false, chatMessages: [],
-        navItems: [ { id: 'dashboard', label: 'Dashboard', icon: 'ri-layout-grid-line' }, { id: 'saved', label: 'Sauvegardes', icon: 'ri-bookmark-3-line' }, { id: 'analytics', label: 'Analyses', icon: 'ri-bar-chart-box-line' }, { id: 'suggestions', label: 'Advisor IA', icon: 'ri-magic-line' } ],
+        navItems: [ 
+            { id: 'dashboard', label: 'Dashboard', icon: 'ri-layout-grid-line' }, 
+            { id: 'saved', label: 'Sauvegardes', icon: 'ri-bookmark-3-line' }, 
+            { id: 'analytics', label: 'Analyses', icon: 'ri-bar-chart-box-line' }, 
+            { id: 'suggestions', label: 'Advisor IA', icon: 'ri-magic-line' } 
+        ],
 
         init() {
             if(window.innerWidth >= 768) this.sidebarOpen = true;
@@ -55,14 +60,18 @@ document.addEventListener('alpine:init', () => {
             try {
                 const res = await fetch('https://technology-watch-spa.onrender.com/news');
                 this.news = await res.json();
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error('Error fetching news:', e); 
+            }
         },
 
         async fetchStats() {
             try {
                 const res = await fetch('https://technology-watch-spa.onrender.com/stats');
                 this.stats = await res.json();
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error('Error fetching stats:', e); 
+            }
         },
 
         async updateTimestamps() {
@@ -90,7 +99,9 @@ document.addEventListener('alpine:init', () => {
                     
                     this.timestamps.lastArticle = `${day} ${time}`;
                 }
-            } catch(e) {}
+            } catch(e) {
+                console.error('Error updating timestamps:', e);
+            }
         },
 
         // --- SCAN LOGIC ---
@@ -103,7 +114,9 @@ document.addEventListener('alpine:init', () => {
                     this.isScanning = true;
                     this.monitorScanProgress();
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error('Error triggering scan:', e); 
+            }
         },
 
         async checkScanStatus() {
@@ -120,7 +133,9 @@ document.addEventListener('alpine:init', () => {
                         this.timestamps.lastScan = new Intl.DateTimeFormat('fr-FR', timeOptions).format(dateScan);
                     }
                 }
-            } catch(e) {}
+            } catch(e) {
+                console.error('Error checking scan status:', e);
+            }
         },
 
         monitorScanProgress() {
@@ -142,6 +157,7 @@ document.addEventListener('alpine:init', () => {
                         this.refreshData(); // Refresh auto à la fin
                     }
                 } catch(e) {
+                    console.error('Error monitoring scan:', e);
                     clearInterval(interval);
                     this.isScanning = false;
                 }
@@ -156,13 +172,41 @@ document.addEventListener('alpine:init', () => {
         },
 
         async toggleSave(item) {
-            if(!item) return;
+            if(!item || !item.id) {
+                console.error('Invalid item for toggle save');
+                return;
+            }
+            
+            // Optimistic update
+            const previousState = item.is_saved;
             item.is_saved = !item.is_saved;
-            try { await fetch(`hhttps://technology-watch-spa.onrender.com/news/${item.id}/toggle-save`, { method: 'POST' }); } 
-            catch(e) { item.is_saved = !item.is_saved; }
+            
+            try { 
+                const res = await fetch(`https://technology-watch-spa.onrender.com/news/${item.id}/toggle-save`, { 
+                    method: 'POST' 
+                });
+                
+                if (!res.ok) {
+                    throw new Error('Failed to toggle save');
+                }
+                
+                const data = await res.json();
+                
+                // Update with server response
+                if (data.status === 'success') {
+                    item.is_saved = data.is_saved;
+                }
+            } catch(e) { 
+                console.error('Error toggling save:', e);
+                // Revert on error
+                item.is_saved = previousState;
+            }
         },
 
-        get savedNews() { if(!this.news) return []; return this.news.filter(n => n.is_saved); },
+        get savedNews() { 
+            if(!this.news) return []; 
+            return this.news.filter(n => n.is_saved); 
+        },
 
         get filteredNews() {
             if (!this.news) return [];
@@ -171,24 +215,49 @@ document.addEventListener('alpine:init', () => {
                 const matchImp = this.filters.impact === 'all' || item.impact_level == this.filters.impact;
                 const matchCat = this.filters.category === 'all' || item.category === this.filters.category;
                 const search = this.filters.search.toLowerCase();
-                const matchSearch = !search || item.title.toLowerCase().includes(search) || item.summary.toLowerCase().includes(search);
+                const matchSearch = !search || 
+                    item.title.toLowerCase().includes(search) || 
+                    item.summary.toLowerCase().includes(search);
                 return matchProv && matchImp && matchCat && matchSearch;
             });
         },
         
-        resetFilters() { this.filters = { search: '', provider: 'all', impact: 'all', category: 'all' }; },
+        resetFilters() { 
+            this.filters = { search: '', provider: 'all', impact: 'all', category: 'all' }; 
+        },
+        
         toggleTheme() {
             this.isDark = !this.isDark;
             document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
             if(this.currentTab === 'analytics') this.initCharts();
         },
-        openModal(item) { this.selectedItem = item; },
         
-        getProviderClass(p) { if(p==='AWS') return 'bg-orange-100 text-orange-600 dark:bg-orange-500/10 dark:text-orange-500'; if(p==='Azure') return 'bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:text-blue-500'; return 'bg-red-100 text-red-600 dark:bg-red-500/10 dark:text-red-500'; },
-        getProviderIcon(p) { if(p==='AWS') return 'ri-amazon-fill'; if(p==='Azure') return 'ri-microsoft-fill'; return 'ri-google-fill'; },
-        getImpactClass(l) { if(l===3) return 'bg-red-50 text-red-600 border-red-100 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'; if(l===2) return 'bg-yellow-50 text-yellow-600 border-yellow-100 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20'; return 'bg-gray-50 text-gray-600 border-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700'; },
-        getImpactLabel(l) { return l===3 ? 'Critique' : (l===2 ? 'Majeur' : 'Mineur'); },
+        openModal(item) { 
+            this.selectedItem = item; 
+        },
+        
+        getProviderClass(p) { 
+            if(p==='AWS') return 'bg-orange-100 text-orange-600 dark:bg-orange-500/10 dark:text-orange-500'; 
+            if(p==='Azure') return 'bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:text-blue-500'; 
+            return 'bg-red-100 text-red-600 dark:bg-red-500/10 dark:text-red-500'; 
+        },
+        
+        getProviderIcon(p) { 
+            if(p==='AWS') return 'ri-amazon-fill'; 
+            if(p==='Azure') return 'ri-microsoft-fill'; 
+            return 'ri-google-fill'; 
+        },
+        
+        getImpactClass(l) { 
+            if(l===3) return 'bg-red-50 text-red-600 border-red-100 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'; 
+            if(l===2) return 'bg-yellow-50 text-yellow-600 border-yellow-100 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20'; 
+            return 'bg-gray-50 text-gray-600 border-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700'; 
+        },
+        
+        getImpactLabel(l) { 
+            return l===3 ? 'Critique' : (l===2 ? 'Majeur' : 'Mineur'); 
+        },
 
         async sendMessage() {
             if (!this.chatInput.trim()) return;
@@ -196,24 +265,137 @@ document.addEventListener('alpine:init', () => {
             this.chatMessages.push({ role: 'user', content: userMsg });
             this.chatInput = '';
             this.chatLoading = true;
-            setTimeout(() => { document.getElementById('chatContainer').scrollTop = 9999; }, 100);
+            setTimeout(() => { 
+                const container = document.getElementById('chatContainer');
+                if (container) container.scrollTop = container.scrollHeight; 
+            }, 100);
+            
             try {
-                const res = await fetch('https://technology-watch-spa.onrender.com/chat', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ question: userMsg }) });
+                const res = await fetch('https://technology-watch-spa.onrender.com/chat', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ question: userMsg }) 
+                });
                 const data = await res.json();
                 this.chatMessages.push({ role: 'bot', content: marked.parse(data.response) });
-            } catch (e) { this.chatMessages.push({ role: 'bot', content: "Erreur IA." }); } 
-            finally { this.chatLoading = false; setTimeout(() => { document.getElementById('chatContainer').scrollTop = 9999; }, 100); }
+            } catch (e) { 
+                console.error('Error sending message:', e);
+                this.chatMessages.push({ role: 'bot', content: "Erreur lors de la communication avec l'IA." }); 
+            } finally { 
+                this.chatLoading = false; 
+                setTimeout(() => { 
+                    const container = document.getElementById('chatContainer');
+                    if (container) container.scrollTop = container.scrollHeight; 
+                }, 100); 
+            }
         },
-        autoGenerateAdvice() { this.chatInput = "Génère un rapport stratégique rapide."; this.sendMessage(); },
+        
+        autoGenerateAdvice() { 
+            this.chatInput = "Génère un rapport stratégique rapide."; 
+            this.sendMessage(); 
+        },
 
         initCharts() {
             if(!this.stats.providers_stats) return;
             const textColor = this.isDark ? '#e5e7eb' : '#374151';
-            ['providerChart', 'categoryChart', 'timelineChart'].forEach(id => { const el = document.getElementById(id); if(el && Chart.getChart(el)) Chart.getChart(el).destroy(); });
-            new Chart(document.getElementById('providerChart'), { type: 'doughnut', data: { labels: Object.keys(this.stats.providers_stats), datasets: [{ data: Object.values(this.stats.providers_stats), backgroundColor: ['#f97316', '#3b82f6', '#ef4444'], borderWidth: 0 }] }, options: { maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: textColor } } } } });
-            new Chart(document.getElementById('categoryChart'), { type: 'bar', data: { labels: Object.keys(this.stats.categories_stats), datasets: [{ label: 'Articles', data: Object.values(this.stats.categories_stats), backgroundColor: '#8b5cf6', borderRadius: 5 }] }, options: { maintainAspectRatio: false, scales: { y: { ticks: { color: textColor } }, x: { ticks: { color: textColor } } }, plugins: { legend: { display: false } } } });
-            const sortedDates = Object.keys(this.stats.timeline_stats).sort();
-            new Chart(document.getElementById('timelineChart'), { type: 'line', data: { labels: sortedDates, datasets: [{ label: 'Volume', data: sortedDates.map(d => this.stats.timeline_stats[d]), borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.4 }] }, options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { color: textColor } }, x: { ticks: { color: textColor } } }, plugins: { legend: { display: false } } } });
+            
+            // Destroy existing charts
+            ['providerChart', 'categoryChart', 'timelineChart'].forEach(id => { 
+                const el = document.getElementById(id); 
+                if(el && Chart.getChart(el)) Chart.getChart(el).destroy(); 
+            });
+            
+            // Provider Chart
+            const providerCtx = document.getElementById('providerChart');
+            if (providerCtx) {
+                new Chart(providerCtx, { 
+                    type: 'doughnut', 
+                    data: { 
+                        labels: Object.keys(this.stats.providers_stats), 
+                        datasets: [{ 
+                            data: Object.values(this.stats.providers_stats), 
+                            backgroundColor: ['#f97316', '#3b82f6', '#ef4444'], 
+                            borderWidth: 0 
+                        }] 
+                    }, 
+                    options: { 
+                        maintainAspectRatio: false, 
+                        plugins: { 
+                            legend: { 
+                                position: 'right', 
+                                labels: { color: textColor } 
+                            } 
+                        } 
+                    } 
+                });
+            }
+            
+            // Category Chart
+            const categoryCtx = document.getElementById('categoryChart');
+            if (categoryCtx) {
+                new Chart(categoryCtx, { 
+                    type: 'bar', 
+                    data: { 
+                        labels: Object.keys(this.stats.categories_stats), 
+                        datasets: [{ 
+                            label: 'Articles', 
+                            data: Object.values(this.stats.categories_stats), 
+                            backgroundColor: '#8b5cf6', 
+                            borderRadius: 5 
+                        }] 
+                    }, 
+                    options: { 
+                        maintainAspectRatio: false, 
+                        scales: { 
+                            y: { 
+                                ticks: { color: textColor },
+                                beginAtZero: true
+                            }, 
+                            x: { 
+                                ticks: { color: textColor } 
+                            } 
+                        }, 
+                        plugins: { 
+                            legend: { display: false } 
+                        } 
+                    } 
+                });
+            }
+            
+            // Timeline Chart
+            const timelineCtx = document.getElementById('timelineChart');
+            if (timelineCtx && this.stats.timeline_stats) {
+                const sortedDates = Object.keys(this.stats.timeline_stats).sort();
+                new Chart(timelineCtx, { 
+                    type: 'line', 
+                    data: { 
+                        labels: sortedDates, 
+                        datasets: [{ 
+                            label: 'Volume', 
+                            data: sortedDates.map(d => this.stats.timeline_stats[d]), 
+                            borderColor: '#10b981', 
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)', 
+                            fill: true, 
+                            tension: 0.4 
+                        }] 
+                    }, 
+                    options: { 
+                        maintainAspectRatio: false, 
+                        scales: { 
+                            y: { 
+                                beginAtZero: true, 
+                                ticks: { color: textColor } 
+                            }, 
+                            x: { 
+                                ticks: { color: textColor } 
+                            } 
+                        }, 
+                        plugins: { 
+                            legend: { display: false } 
+                        } 
+                    } 
+                });
+            }
         }
     }));
 });

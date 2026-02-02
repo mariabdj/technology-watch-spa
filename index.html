@@ -2,7 +2,7 @@
 <html lang="fr" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Cloud Watcher | Command Center</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -34,103 +34,173 @@
     <div x-show="sidebarOpen" class="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm" x-transition.opacity @click="sidebarOpen = false"></div>
 
     <!-- SIDEBAR -->
-    <!-- CORRECTION: Suppression de la classe 'w-64' par défaut ici pour laisser Alpine gérer la largeur -->
     <aside class="fixed md:static inset-y-0 left-0 z-40 flex flex-col border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-[#18181b] transition-all duration-300 overflow-hidden"
            :class="sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0 md:w-20'">
         
-        <div class="h-16 md:h-20 flex items-center px-6 border-b border-gray-100 dark:border-zinc-800 justify-between md:justify-start overflow-hidden">
-            <div class="flex items-center min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-brand flex items-center justify-center shrink-0 shadow-lg shadow-brand/30"><i class="ri-radar-fill text-white"></i></div>
-                <!-- Le titre disparait proprement si fermé -->
-                <span x-show="sidebarOpen" class="ml-3 font-bold text-lg tracking-tight whitespace-nowrap transition-opacity duration-200">CloudWatcher</span>
+        <div class="h-16 md:h-20 flex items-center px-4 md:px-6 border-b border-gray-100 dark:border-zinc-800 justify-between md:justify-start overflow-hidden">
+            <div class="flex items-center min-w-0 gap-3">
+                <div class="w-8 h-8 rounded-lg bg-brand flex items-center justify-center shrink-0 shadow-lg shadow-brand/30">
+                    <i class="ri-radar-fill text-white"></i>
+                </div>
+                <span x-show="sidebarOpen" class="font-bold text-base md:text-lg tracking-tight whitespace-nowrap transition-opacity duration-200">CloudWatcher</span>
             </div>
-            <button @click="sidebarOpen = false" class="md:hidden text-gray-500"><i class="ri-close-line text-2xl"></i></button>
+            <button @click="sidebarOpen = false" class="md:hidden text-gray-500 p-2">
+                <i class="ri-close-line text-2xl"></i>
+            </button>
         </div>
 
-        <nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto overflow-x-hidden">
+        <nav class="flex-1 py-4 md:py-6 px-2 md:px-3 space-y-1 overflow-y-auto overflow-x-hidden">
             <template x-for="item in navItems">
-                <a href="#" @click.prevent="switchTab(item.id)" class="flex items-center gap-4 px-3 py-3 rounded-xl transition-colors whitespace-nowrap" :class="currentTab === item.id ? 'bg-brand/10 text-brand font-bold' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5'">
+                <a href="#" @click.prevent="switchTab(item.id)" 
+                   class="flex items-center gap-3 md:gap-4 px-3 py-3 rounded-xl transition-colors whitespace-nowrap" 
+                   :class="currentTab === item.id ? 'bg-brand/10 text-brand font-bold' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5'">
                     <i :class="item.icon + ' text-xl shrink-0'"></i>
-                    <!-- Le texte disparait proprement si fermé -->
-                    <span x-show="sidebarOpen" x-text="item.label" class="transition-opacity duration-200"></span>
+                    <span x-show="sidebarOpen" x-text="item.label" class="transition-opacity duration-200 text-sm md:text-base"></span>
                 </a>
             </template>
         </nav>
 
-        <div class="p-3 border-t border-gray-100 dark:border-zinc-800 space-y-2 bg-white dark:bg-[#18181b]">
-            <button @click="sidebarOpen = !sidebarOpen" class="hidden md:flex w-full items-center justify-center p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500"><i :class="sidebarOpen ? 'ri-menu-fold-line' : 'ri-menu-unfold-line'"></i></button>
-            <button @click="toggleTheme()" class="w-full flex items-center gap-4 px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5 overflow-hidden">
-                <i :class="isDark ? 'ri-moon-line' : 'ri-sun-line'" class="shrink-0"></i>
-                <span x-show="sidebarOpen" class="text-sm transition-opacity duration-200" x-text="isDark ? 'Mode Sombre' : 'Mode Clair'"></span>
+        <div class="p-2 md:p-3 border-t border-gray-100 dark:border-zinc-800 space-y-2 bg-white dark:bg-[#18181b]">
+            <button @click="sidebarOpen = !sidebarOpen" 
+                    class="hidden md:flex w-full items-center justify-center p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500">
+                <i :class="sidebarOpen ? 'ri-menu-fold-line' : 'ri-menu-unfold-line'"></i>
+            </button>
+            <button @click="toggleTheme()" 
+                    class="w-full flex items-center gap-3 md:gap-4 px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5 overflow-hidden">
+                <i :class="isDark ? 'ri-moon-line' : 'ri-sun-line'" class="shrink-0 text-lg"></i>
+                <span x-show="sidebarOpen" class="text-xs md:text-sm transition-opacity duration-200" x-text="isDark ? 'Mode Sombre' : 'Mode Clair'"></span>
             </button>
         </div>
     </aside>
 
     <!-- MAIN -->
-    <main class="flex-1 flex flex-col min-w-0 relative h-full">
+    <main class="flex-1 flex flex-col min-w-0 relative h-full overflow-hidden">
         
         <!-- HEADER -->
-        <header class="h-auto py-3 md:h-20 md:py-0 px-4 md:px-8 flex flex-col md:flex-row md:items-center justify-between bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-xl border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-20 shrink-0 gap-3">
+        <header class="py-3 md:py-0 md:h-20 px-4 md:px-8 flex flex-col md:flex-row md:items-center justify-between bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-xl border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-20 shrink-0 gap-2 md:gap-3">
             
-            <div class="flex items-center justify-between w-full md:w-auto">
-                <div class="flex items-center gap-3">
-                    <button @click="sidebarOpen = true" class="md:hidden p-2 -ml-2 text-gray-600 dark:text-gray-300"><i class="ri-menu-2-line text-2xl"></i></button>
-                    <h1 class="text-xl md:text-2xl font-bold truncate" x-text="navItems.find(i => i.id === currentTab).label"></h1>
+            <div class="flex items-center justify-between w-full md:w-auto min-w-0">
+                <div class="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+                    <button @click="sidebarOpen = true" class="md:hidden p-2 -ml-2 text-gray-600 dark:text-gray-300 shrink-0">
+                        <i class="ri-menu-2-line text-xl md:text-2xl"></i>
+                    </button>
+                    <h1 class="text-lg md:text-2xl font-bold truncate" x-text="navItems.find(i => i.id === currentTab).label"></h1>
                 </div>
-                <button @click="showGlossary = true" class="md:hidden w-8 h-8 rounded-full border border-gray-200 dark:border-zinc-700 flex items-center justify-center text-gray-500"><i class="ri-question-line"></i></button>
+                <button @click="showGlossary = true" 
+                        class="md:hidden w-8 h-8 rounded-full border border-gray-200 dark:border-zinc-700 flex items-center justify-center text-gray-500 shrink-0">
+                    <i class="ri-question-line text-sm"></i>
+                </button>
             </div>
             
-            <div class="flex flex-col md:flex-row items-end md:items-center gap-3 md:gap-6 w-full md:w-auto">
+            <div class="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-6 w-full md:w-auto">
                 
                 <!-- TIMESTAMPS -->
-                <div class="text-xs text-right text-gray-500 font-mono hidden sm:block">
-                    <p class="flex items-center justify-end gap-2">Dernier Scan: <span class="text-gray-900 dark:text-white font-bold" x-text="timestamps.lastScan">--:--</span> <i class="ri-radar-line"></i></p>
-                    <p class="flex items-center justify-end gap-2">Dernier Article: <span class="text-brand font-bold" x-text="timestamps.lastArticle">--:--</span> <i class="ri-rss-fill"></i></p>
+                <div class="text-[10px] md:text-xs text-left md:text-right text-gray-500 font-mono w-full md:w-auto">
+                    <p class="flex items-center justify-start md:justify-end gap-1 md:gap-2 whitespace-nowrap">
+                        <span class="hidden sm:inline">Dernier Scan:</span>
+                        <span class="sm:hidden">Scan:</span>
+                        <span class="text-gray-900 dark:text-white font-bold" x-text="timestamps.lastScan">--:--</span> 
+                        <i class="ri-radar-line"></i>
+                    </p>
+                    <p class="flex items-center justify-start md:justify-end gap-1 md:gap-2 whitespace-nowrap">
+                        <span class="hidden sm:inline">Dernier Article:</span>
+                        <span class="sm:hidden">Article:</span>
+                        <span class="text-brand font-bold" x-text="timestamps.lastArticle">--:--</span> 
+                        <i class="ri-rss-fill"></i>
+                    </p>
                 </div>
 
                 <!-- BOUTONS -->
                 <div class="flex items-center gap-2 w-full md:w-auto">
                     <!-- SCAN -->
-                    <button @click="triggerScan" :disabled="isScanning"
-                            class="relative flex-1 md:flex-none flex items-center justify-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg text-sm font-bold disabled:opacity-50 overflow-hidden hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
-                        <i class="ri-radar-fill" :class="isScanning ? 'animate-spin' : ''"></i>
-                        <span x-text="isScanning ? 'Scan...' : 'Scanner'"></span>
-                        <div x-show="isScanning" class="absolute bottom-0 left-0 h-0.5 bg-brand transition-all duration-300" :style="'width: ' + scanProgress + '%'"></div>
+                    <button @click="triggerScan" 
+                            :disabled="isScanning" 
+                            class="scan-button flex-1 md:flex-initial bg-brand hover:bg-blue-600 disabled:bg-gray-400 text-white px-3 md:px-4 py-2 rounded-lg font-bold transition-all flex items-center justify-center gap-2 text-xs md:text-sm whitespace-nowrap">
+                        <i :class="isScanning ? 'ri-loader-4-line animate-spin' : 'ri-refresh-line'"></i>
+                        <span x-text="isScanning ? 'En cours...' : 'Scanner'"></span>
                     </button>
-
+                    
                     <!-- REFRESH -->
                     <button @click="refreshData" 
-                            class="flex-1 md:flex-none flex items-center justify-center gap-2 border border-gray-200 dark:border-zinc-700 bg-white dark:bg-[#18181b] text-gray-700 dark:text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-50 dark:hover:bg-[#202024] transition-all relative">
-                        <i class="ri-refresh-line" :class="loading ? 'animate-spin' : ''"></i>
-                        <span>Actualiser</span>
-                        <span x-show="hasNewData" class="absolute -top-1 -right-1 flex h-3 w-3">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-3 w-3 bg-brand"></span>
-                        </span>
+                            :disabled="loading" 
+                            class="bg-gray-200 dark:bg-zinc-800 hover:bg-gray-300 dark:hover:bg-zinc-700 px-3 md:px-4 py-2 rounded-lg font-bold transition-colors text-xs md:text-sm whitespace-nowrap">
+                        <i :class="loading ? 'ri-loader-4-line animate-spin' : 'ri-download-cloud-line'"></i>
+                        <span class="hidden md:inline ml-2">Actualiser</span>
                     </button>
-
-                    <button @click="showGlossary = true" class="hidden md:flex w-9 h-9 rounded-full border border-gray-200 dark:border-zinc-700 items-center justify-center text-gray-500 hover:text-brand hover:border-brand transition-colors"><i class="ri-question-line"></i></button>
+                    
+                    <!-- GLOSSARY (desktop) -->
+                    <button @click="showGlossary = true" 
+                            class="hidden md:block bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm">
+                        <i class="ri-question-line"></i>
+                    </button>
                 </div>
             </div>
         </header>
 
+        <!-- SCAN PROGRESS BAR -->
+        <div x-show="isScanning" class="h-1 bg-gray-200 dark:bg-zinc-800 w-full" x-transition>
+            <div class="h-full bg-brand transition-all duration-300 progress-bar" :style="`width: ${scanProgress}%`"></div>
+        </div>
+
+        <!-- NEW DATA NOTIFICATION -->
+        <div x-show="hasNewData" 
+             x-transition 
+             class="mx-4 md:mx-8 mt-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 md:p-4 flex items-center justify-between">
+            <div class="flex items-center gap-2 md:gap-3 min-w-0">
+                <i class="ri-checkbox-circle-fill text-green-600 text-lg md:text-xl shrink-0"></i>
+                <p class="text-xs md:text-sm text-green-700 dark:text-green-400 font-bold truncate">Nouvelles données disponibles !</p>
+            </div>
+            <button @click="hasNewData = false; refreshData()" 
+                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold whitespace-nowrap shrink-0">
+                Charger
+            </button>
+        </div>
+
         <!-- VIEW: DASHBOARD -->
-        <div x-show="currentTab === 'dashboard'" class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8" x-transition.opacity>
-            <!-- KPI -->
-            <div class="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8 overflow-x-auto pb-4 md:pb-0 snap-x">
-                <div class="stat-card snap-center shrink-0 w-[240px] md:w-auto"><div class="icon-box text-brand bg-blue-500/10"><i class="ri-article-line"></i></div><div><h3 class="text-2xl md:text-3xl font-black" x-text="stats.total_news">0</h3><p class="text-label">Articles</p></div></div>
-                <div class="stat-card snap-center shrink-0 w-[240px] md:w-auto"><div class="icon-box text-danger bg-red-500/10"><i class="ri-alarm-warning-line"></i></div><div><h3 class="text-2xl md:text-3xl font-black" x-text="stats.critical_news">0</h3><p class="text-label">Critiques</p></div></div>
-                <div class="stat-card snap-center shrink-0 w-[240px] md:w-auto"><div class="icon-box text-success bg-green-500/10"><i class="ri-cloud-line"></i></div><div><h3 class="text-xl font-bold truncate" x-text="stats.active_provider">NA</h3><p class="text-label">Leader</p></div></div>
+        <div x-show="currentTab === 'dashboard'" class="flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-8 space-y-4 md:space-y-6" x-transition.opacity>
+            
+            <!-- STATS GRID -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                <div class="stat-card">
+                    <div class="icon-box bg-brand/10 text-brand"><i class="ri-newspaper-line"></i></div>
+                    <div class="min-w-0">
+                        <p class="text-label">Total News</p>
+                        <p class="text-xl md:text-2xl font-black" x-text="stats.total_news || 0"></p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500"><i class="ri-alarm-warning-line"></i></div>
+                    <div class="min-w-0">
+                        <p class="text-label">Critiques</p>
+                        <p class="text-xl md:text-2xl font-black text-red-600" x-text="stats.critical_news || 0"></p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-500"><i class="ri-trophy-line"></i></div>
+                    <div class="min-w-0">
+                        <p class="text-label">+ Actif</p>
+                        <p class="text-base md:text-lg font-black truncate" x-text="stats.active_provider || 'N/A'"></p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box bg-purple-100 dark:bg-purple-500/10 text-purple-600 dark:text-purple-500"><i class="ri-bookmark-3-line"></i></div>
+                    <div class="min-w-0">
+                        <p class="text-label">Sauvegardés</p>
+                        <p class="text-xl md:text-2xl font-black" x-text="savedNews.length || 0"></p>
+                    </div>
+                </div>
             </div>
 
-            <!-- FILTRES -->
-            <div class="bg-white dark:bg-[#18181b] p-4 rounded-2xl border border-gray-200 dark:border-zinc-800 mb-6 flex flex-col md:flex-row flex-wrap gap-3 items-stretch md:items-center shadow-sm">
-                <div class="flex items-center bg-gray-50 dark:bg-[#202024] px-3 py-2 rounded-xl border border-transparent focus-within:border-brand md:w-64">
-                    <i class="ri-search-line text-gray-400"></i>
-                    <input type="text" x-model="filters.search" placeholder="Recherche..." class="bg-transparent border-none outline-none text-sm ml-2 w-full">
-                </div>
-                
-                <div class="flex gap-2 overflow-x-auto pb-1 md:pb-0">
+            <!-- FILTERS -->
+            <div class="bg-white dark:bg-[#18181b] border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 md:p-6 space-y-3 md:space-y-4">
+                <h2 class="font-bold text-base md:text-lg flex items-center gap-2">
+                    <i class="ri-filter-3-line"></i> Filtres
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
+                    <input type="text" 
+                           x-model="filters.search" 
+                           placeholder="Rechercher..." 
+                           class="bg-white dark:bg-[#09090b] border border-gray-200 dark:border-zinc-700 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm outline-none focus:border-brand w-full">
                     <select x-model="filters.provider" class="filter-select">
                         <option value="all">Tous Providers</option>
                         <option value="AWS">AWS</option>
@@ -138,9 +208,10 @@
                         <option value="GCP">GCP</option>
                     </select>
                     <select x-model="filters.impact" class="filter-select">
-                        <option value="all">Tout Impact</option>
-                        <option value="3">Critique</option>
-                        <option value="2">Majeur</option>
+                        <option value="all">Tous Impacts</option>
+                        <option value="3">Critique (3)</option>
+                        <option value="2">Majeur (2)</option>
+                        <option value="1">Mineur (1)</option>
                     </select>
                     <select x-model="filters.category" class="filter-select">
                         <option value="all">Toutes Catégories</option>
@@ -150,88 +221,220 @@
                     </select>
                 </div>
                 
-                <button @click="resetFilters" class="text-sm text-gray-500 hover:text-brand underline md:ml-auto text-left">Réinitialiser</button>
+                <button @click="resetFilters" class="text-xs md:text-sm text-gray-500 hover:text-brand underline">
+                    Réinitialiser les filtres
+                </button>
             </div>
 
             <!-- NEWS GRID -->
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-3 md:gap-4">
                 <template x-for="item in filteredNews" :key="item.id">
                     <div class="news-card group relative">
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="flex items-center gap-3">
-                                <div class="provider-badge" :class="getProviderClass(item.provider)"><i :class="getProviderIcon(item.provider)"></i></div>
-                                <div><span class="text-xs font-bold text-gray-500 uppercase" x-text="item.provider"></span><p class="text-xs font-bold text-brand" x-text="item.service || 'Général'"></p></div>
+                        <div class="flex justify-between items-start mb-2 gap-2">
+                            <div class="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+                                <div class="provider-badge" :class="getProviderClass(item.provider)">
+                                    <i :class="getProviderIcon(item.provider)"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <span class="text-[10px] md:text-xs font-bold text-gray-500 uppercase block truncate" x-text="item.provider"></span>
+                                    <p class="text-[10px] md:text-xs font-bold text-brand truncate" x-text="item.service || 'Général'"></p>
+                                </div>
                             </div>
-                            <div class="flex gap-2 items-center">
+                            <div class="flex gap-1 md:gap-2 items-center shrink-0">
                                 <span class="impact-badge" :class="getImpactClass(item.impact_level)" x-text="getImpactLabel(item.impact_level)"></span>
-                                <button @click.stop="toggleSave(item)" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors z-10"><i :class="item.is_saved ? 'ri-bookmark-fill text-brand' : 'ri-bookmark-line text-gray-400'" class="text-lg"></i></button>
+                                <button @click.stop="toggleSave(item)" 
+                                        class="p-1 md:p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                                    <i :class="item.is_saved ? 'ri-bookmark-fill text-brand' : 'ri-bookmark-line text-gray-400'" 
+                                       class="text-base md:text-lg"></i>
+                                </button>
                             </div>
                         </div>
                         <div @click="openModal(item)" class="cursor-pointer">
-                            <h3 class="text-lg font-bold mb-1 group-hover:text-brand transition-colors leading-tight" x-text="item.title"></h3>
+                            <h3 class="text-sm md:text-lg font-bold mb-1 md:mb-2 group-hover:text-brand transition-colors leading-tight line-clamp-2" x-text="item.title"></h3>
                             <div class="flex gap-2 mb-2">
-                                <span class="text-[10px] bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded text-gray-500" x-text="item.category"></span>
+                                <span class="text-[9px] md:text-[10px] bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded text-gray-500 truncate" x-text="item.category"></span>
                             </div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2" x-text="item.summary"></p>
+                            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 line-clamp-2" x-text="item.summary"></p>
                         </div>
                     </div>
                 </template>
             </div>
             
-            <div x-show="filteredNews.length === 0" class="empty-state"><i class="ri-search-eye-line text-4xl mb-2 text-gray-600"></i><p>Aucun résultat.</p></div>
+            <div x-show="filteredNews.length === 0" class="empty-state">
+                <i class="ri-search-eye-line text-3xl md:text-4xl mb-2 text-gray-600"></i>
+                <p class="text-sm md:text-base">Aucun résultat trouvé.</p>
+            </div>
         </div>
 
         <!-- VIEW: SAVED -->
-        <div x-show="currentTab === 'saved'" class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8" x-transition.opacity>
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div x-show="currentTab === 'saved'" class="flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-8" x-transition.opacity>
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-3 md:gap-4">
                 <template x-for="item in savedNews" :key="item.id">
                     <div class="news-card group relative border-brand/50">
-                        <div class="absolute -top-3 -right-3 bg-brand text-white p-1 rounded-full shadow-lg scale-75"><i class="ri-bookmark-fill"></i></div>
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="flex items-center gap-3"><div class="provider-badge" :class="getProviderClass(item.provider)"><i :class="getProviderIcon(item.provider)"></i></div><div><span class="text-xs font-bold text-gray-500 uppercase" x-text="item.provider"></span><p class="text-xs font-bold text-brand" x-text="item.service || 'Général'"></p></div></div>
-                            <button @click.stop="toggleSave(item)" class="text-sm text-red-500 font-bold hover:underline">Retirer</button>
+                        <div class="absolute -top-2 -right-2 md:-top-3 md:-right-3 bg-brand text-white p-1 rounded-full shadow-lg scale-75">
+                            <i class="ri-bookmark-fill text-sm"></i>
                         </div>
-                        <div @click="openModal(item)" class="cursor-pointer"><h3 class="text-lg font-bold mb-2" x-text="item.title"></h3><p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2" x-text="item.summary"></p></div>
+                        <div class="flex justify-between items-start mb-2 gap-2">
+                            <div class="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+                                <div class="provider-badge" :class="getProviderClass(item.provider)">
+                                    <i :class="getProviderIcon(item.provider)"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <span class="text-[10px] md:text-xs font-bold text-gray-500 uppercase block truncate" x-text="item.provider"></span>
+                                    <p class="text-[10px] md:text-xs font-bold text-brand truncate" x-text="item.service || 'Général'"></p>
+                                </div>
+                            </div>
+                            <button @click.stop="toggleSave(item)" 
+                                    class="text-xs md:text-sm text-red-500 font-bold hover:underline whitespace-nowrap shrink-0">
+                                Retirer
+                            </button>
+                        </div>
+                        <div @click="openModal(item)" class="cursor-pointer">
+                            <h3 class="text-sm md:text-lg font-bold mb-1 md:mb-2 line-clamp-2" x-text="item.title"></h3>
+                            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 line-clamp-2" x-text="item.summary"></p>
+                        </div>
                     </div>
                 </template>
             </div>
-            <div x-show="savedNews.length === 0" class="empty-state"><i class="ri-bookmark-2-line text-4xl mb-2 text-gray-600"></i><p>Aucun article sauvegardé.</p></div>
+            <div x-show="savedNews.length === 0" class="empty-state">
+                <i class="ri-bookmark-2-line text-3xl md:text-4xl mb-2 text-gray-600"></i>
+                <p class="text-sm md:text-base">Aucun article sauvegardé.</p>
+            </div>
         </div>
 
         <!-- VIEW: ANALYTICS -->
-        <div x-show="currentTab === 'analytics'" class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8" x-transition.opacity>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8"><div class="chart-container"><h3 class="chart-title">Répartition par Provider</h3><div class="h-56 md:h-64 flex justify-center"><canvas id="providerChart"></canvas></div></div><div class="chart-container"><h3 class="chart-title">Top Catégories</h3><div class="h-56 md:h-64"><canvas id="categoryChart"></canvas></div></div><div class="chart-container lg:col-span-2"><h3 class="chart-title">Volume d'annonces</h3><div class="h-56 md:h-64"><canvas id="timelineChart"></canvas></div></div></div>
+        <div x-show="currentTab === 'analytics'" class="flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-8" x-transition.opacity>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
+                <div class="chart-container">
+                    <h3 class="chart-title">Répartition par Provider</h3>
+                    <div class="h-48 md:h-56 lg:h-64 flex justify-center">
+                        <canvas id="providerChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Top Catégories</h3>
+                    <div class="h-48 md:h-56 lg:h-64">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container lg:col-span-2">
+                    <h3 class="chart-title">Volume d'annonces</h3>
+                    <div class="h-48 md:h-56 lg:h-64">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- VIEW: SUGGESTIONS -->
-        <div x-show="currentTab === 'suggestions'" class="flex-1 flex flex-col p-4 md:p-8 h-full overflow-hidden pb-20 md:pb-8" x-transition.opacity>
+        <div x-show="currentTab === 'suggestions'" class="flex-1 flex flex-col p-4 md:p-8 overflow-hidden pb-20 md:pb-8" x-transition.opacity>
             <div class="bg-gradient-to-r from-brand to-purple-600 rounded-2xl p-4 md:p-6 mb-4 md:mb-6 text-white shadow-lg shrink-0">
-                <h2 class="text-xl md:text-2xl font-bold mb-2 flex items-center gap-2"><i class="ri-magic-line"></i> IA Advisor</h2>
-                <p class="opacity-90 text-sm md:text-base hidden md:block">Basé sur les news récentes, obtenez des conseils stratégiques personnalisés.</p>
-                <button @click="autoGenerateAdvice" class="mt-2 md:mt-4 bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold backdrop-blur-sm transition-colors">Générer rapport</button>
+                <h2 class="text-lg md:text-2xl font-bold mb-2 flex items-center gap-2">
+                    <i class="ri-magic-line"></i> IA Advisor
+                </h2>
+                <p class="opacity-90 text-xs md:text-base hidden md:block">
+                    Basé sur les news récentes, obtenez des conseils stratégiques personnalisés.
+                </p>
+                <button @click="autoGenerateAdvice" 
+                        class="mt-2 md:mt-4 bg-white/20 hover:bg-white/30 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold backdrop-blur-sm transition-colors">
+                    Générer rapport
+                </button>
             </div>
             <div class="flex-1 bg-white dark:bg-[#18181b] rounded-2xl border border-gray-200 dark:border-zinc-800 flex flex-col overflow-hidden shadow-sm min-h-0">
-                <div class="flex-1 p-4 md:p-6 overflow-y-auto space-y-4 md:space-y-6" id="chatContainer"><template x-for="msg in chatMessages"><div class="flex gap-3 md:gap-4" :class="msg.role === 'user' ? 'flex-row-reverse' : ''"><div class="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shrink-0" :class="msg.role === 'user' ? 'bg-gray-700 dark:bg-white' : 'bg-brand'"><i :class="msg.role === 'user' ? 'ri-user-line text-white dark:text-black' : 'ri-robot-2-line text-white'"></i></div><div class="p-3 md:p-4 rounded-2xl max-w-[85%] md:max-w-3xl text-sm leading-relaxed" :class="msg.role === 'user' ? 'bg-gray-200 dark:bg-zinc-800 rounded-tr-none' : 'bg-gray-100 dark:bg-[#202024] rounded-tl-none'"><div x-html="msg.content"></div></div></div></template><div x-show="chatLoading" class="flex gap-4"><div class="w-8 h-8 rounded-full bg-brand flex items-center justify-center"><i class="ri-loader-4-line animate-spin text-white"></i></div><div class="bg-gray-100 dark:bg-[#202024] p-3 rounded-2xl"><p class="text-sm text-gray-500">...</p></div></div></div>
-                <div class="p-3 md:p-4 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-[#101012] shrink-0"><form @submit.prevent="sendMessage" class="flex gap-2"><input type="text" x-model="chatInput" placeholder="Posez une question..." class="flex-1 bg-white dark:bg-[#18181b] border border-gray-200 dark:border-zinc-700 rounded-xl px-4 py-3 focus:border-brand outline-none text-sm"><button type="submit" :disabled="!chatInput || chatLoading" class="bg-brand text-white px-4 rounded-xl font-bold disabled:opacity-50"><i class="ri-send-plane-fill"></i></button></form></div>
+                <div class="flex-1 p-3 md:p-6 overflow-y-auto space-y-3 md:space-y-6" id="chatContainer">
+                    <template x-for="msg in chatMessages" :key="msg">
+                        <div class="flex gap-2 md:gap-4" :class="msg.role === 'user' ? 'flex-row-reverse' : ''">
+                            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shrink-0" 
+                                 :class="msg.role === 'user' ? 'bg-gray-700 dark:bg-white' : 'bg-brand'">
+                                <i :class="msg.role === 'user' ? 'ri-user-line text-white dark:text-black' : 'ri-robot-2-line text-white'" 
+                                   class="text-sm md:text-base"></i>
+                            </div>
+                            <div class="p-3 md:p-4 rounded-2xl max-w-[85%] md:max-w-3xl text-xs md:text-sm leading-relaxed prose" 
+                                 :class="msg.role === 'user' ? 'bg-gray-200 dark:bg-zinc-800 rounded-tr-none' : 'bg-gray-100 dark:bg-[#202024] rounded-tl-none'">
+                                <div x-html="msg.content"></div>
+                            </div>
+                        </div>
+                    </template>
+                    <div x-show="chatLoading" class="flex gap-3 md:gap-4">
+                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-brand flex items-center justify-center">
+                            <i class="ri-loader-4-line animate-spin text-white text-sm md:text-base"></i>
+                        </div>
+                        <div class="bg-gray-100 dark:bg-[#202024] p-3 rounded-2xl">
+                            <p class="text-xs md:text-sm text-gray-500">Réflexion en cours...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 md:p-4 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-[#101012] shrink-0">
+                    <form @submit.prevent="sendMessage" class="flex gap-2">
+                        <input type="text" 
+                               x-model="chatInput" 
+                               placeholder="Posez une question..." 
+                               class="flex-1 bg-white dark:bg-[#18181b] border border-gray-200 dark:border-zinc-700 rounded-xl px-3 md:px-4 py-2 md:py-3 focus:border-brand outline-none text-xs md:text-sm min-w-0">
+                        <button type="submit" 
+                                :disabled="!chatInput || chatLoading" 
+                                class="bg-brand text-white px-3 md:px-4 py-2 md:py-3 rounded-xl font-bold disabled:opacity-50 transition-opacity shrink-0">
+                            <i class="ri-send-plane-fill text-sm md:text-base"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
     </main>
 
     <!-- MODAL NEWS DETAIL -->
-    <div x-show="selectedItem" class="modal-backdrop" x-transition.opacity>
-        <div class="modal-content max-w-2xl mx-4 max-h-[90vh] overflow-y-auto" @click.away="selectedItem = null">
-            <div class="flex justify-between items-start mb-4"><h2 class="text-xl md:text-2xl font-bold leading-tight" x-text="selectedItem?.title"></h2><button @click="selectedItem = null" class="p-2"><i class="ri-close-line text-2xl"></i></button></div>
-            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl mb-4 border-l-4 border-brand"><p class="text-sm font-bold text-brand mb-1">Analyse IA</p><p class="text-sm italic" x-text="selectedItem?.impact_analysis"></p></div>
-            <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed" x-text="selectedItem?.summary"></p>
-            <div class="flex gap-3"><a :href="selectedItem?.link" target="_blank" class="flex-1 text-center bg-black dark:bg-white text-white dark:text-black font-bold py-3 rounded-xl">Lire</a><button @click="toggleSave(selectedItem)" class="px-4 rounded-xl border border-gray-300 dark:border-zinc-700 text-xl flex items-center justify-center"><i :class="selectedItem?.is_saved ? 'ri-bookmark-fill text-brand' : 'ri-bookmark-line'"></i></button></div>
+    <div x-show="selectedItem" class="modal-backdrop" x-transition.opacity @click="selectedItem = null">
+        <div class="modal-content max-w-2xl max-h-[90vh] overflow-y-auto" @click.stop>
+            <div class="flex justify-between items-start mb-4 gap-3">
+                <h2 class="text-base md:text-2xl font-bold leading-tight flex-1 min-w-0" x-text="selectedItem?.title"></h2>
+                <button @click="selectedItem = null" class="p-2 shrink-0 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors">
+                    <i class="ri-close-line text-xl md:text-2xl"></i>
+                </button>
+            </div>
+            <div class="bg-blue-50 dark:bg-blue-900/20 p-3 md:p-4 rounded-xl mb-4 border-l-4 border-brand">
+                <p class="text-xs md:text-sm font-bold text-brand mb-1">Analyse IA</p>
+                <p class="text-xs md:text-sm italic" x-text="selectedItem?.impact_analysis"></p>
+            </div>
+            <p class="text-xs md:text-base text-gray-600 dark:text-gray-300 mb-6 leading-relaxed" x-text="selectedItem?.summary"></p>
+            <div class="flex gap-2 md:gap-3">
+                <a :href="selectedItem?.link" 
+                   target="_blank" 
+                   class="flex-1 text-center bg-black dark:bg-white text-white dark:text-black font-bold py-2 md:py-3 rounded-xl text-xs md:text-sm hover:opacity-90 transition-opacity">
+                    Lire l'article complet
+                </a>
+                <button @click="toggleSave(selectedItem)" 
+                        class="px-3 md:px-4 rounded-xl border border-gray-300 dark:border-zinc-700 text-lg md:text-xl flex items-center justify-center hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                    <i :class="selectedItem?.is_saved ? 'ri-bookmark-fill text-brand' : 'ri-bookmark-line'"></i>
+                </button>
+            </div>
         </div>
     </div>
-    <div x-show="showGlossary" class="modal-backdrop" x-transition.opacity>
-        <div class="modal-content mx-4" @click.away="showGlossary = false">
-            <h2 class="text-xl font-bold mb-4">Légende</h2>
-            <div class="space-y-4"><p class="text-sm text-gray-500"><strong>Critique (3)</strong> : Changement majeur.<br><strong>Majeur (2)</strong> : Amélioration notable.<br><strong>Mineur (1)</strong> : Maintenance.</p></div>
-            <button @click="showGlossary = false" class="mt-6 w-full bg-gray-200 dark:bg-zinc-800 py-3 rounded-xl font-bold">Fermer</button>
+
+    <!-- MODAL GLOSSARY -->
+    <div x-show="showGlossary" class="modal-backdrop" x-transition.opacity @click="showGlossary = false">
+        <div class="modal-content" @click.stop>
+            <h2 class="text-lg md:text-xl font-bold mb-4">Légende des Impacts</h2>
+            <div class="space-y-4">
+                <div>
+                    <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        <strong class="text-red-600">Critique (3)</strong> : Changement majeur ayant un impact significatif sur votre infrastructure ou stratégie cloud.
+                    </p>
+                </div>
+                <div>
+                    <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        <strong class="text-yellow-600">Majeur (2)</strong> : Amélioration notable ou nouvelle fonctionnalité qui mérite attention.
+                    </p>
+                </div>
+                <div>
+                    <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        <strong class="text-gray-600">Mineur (1)</strong> : Mise à jour de maintenance ou petite amélioration.
+                    </p>
+                </div>
+            </div>
+            <button @click="showGlossary = false" 
+                    class="mt-6 w-full bg-gray-200 dark:bg-zinc-800 hover:bg-gray-300 dark:hover:bg-zinc-700 py-2 md:py-3 rounded-xl font-bold text-xs md:text-sm transition-colors">
+                Fermer
+            </button>
         </div>
     </div>
 </body>
